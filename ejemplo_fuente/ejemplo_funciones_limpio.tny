@@ -1,8 +1,7 @@
 {Ejemplo de funciones con ambitos global y local}
-int contador_global;
-int valor_global;
+int contador_global := 0;
+int valor_global := 5;
 int numeros[3];
-int i;
 
 func suma(int a, int b)
     int resultado;
@@ -16,11 +15,15 @@ func incrementar()
 end
 
 {Programa principal}
-contador_global := 0;
-valor_global := 5;
+int resultado1;
+int resultado2;
+int i;
 
-write suma(3, 4);
-write suma(valor_global, 2);
+resultado1 := suma(3, 4);
+write resultado1;
+
+resultado2 := suma(valor_global, 2);
+write resultado2;
 
 incrementar();
 incrementar();
