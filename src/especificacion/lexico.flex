@@ -26,11 +26,11 @@ import java.io.Reader;
 /******************************************************************
 BORRAR SI NO SE NECESITA
 	//TODO: Cambiar la SF por esto o ver que se hace
-	//Crear un nuevo objeto java_cup.runtime.Symbol con información sobre el token actual sin valor
+	//Crear un nuevo objeto java_cup.runtime.Symbol con informaciï¿½n sobre el token actual sin valor
  	  private Symbol symbol(int type){
     		return new Symbol(type,yyline,yycolumn);
 	  }
-	//Crear un nuevo objeto java_cup.runtime.Symbol con información sobre el token actual con valor
+	//Crear un nuevo objeto java_cup.runtime.Symbol con informaciï¿½n sobre el token actual con valor
 	  private Symbol symbol(int type,Object value){
     		return new Symbol(type,yyline,yycolumn,value);
 	  }
@@ -49,7 +49,7 @@ BORRAR SI NO SE NECESITA
 digito		= [0-9]
 numero		= {digito}+
 letra			= [a-zA-Z]
-identificador	= {letra}+
+identificador	= {letra}({letra}|[0-9]|_)*
 nuevalinea		= \n | \n\r | \r\n
 espacio		= [ \t]+
 %%
@@ -100,6 +100,12 @@ espacio		= [ \t]+
 			}
 "not"         {	if(debug) System.out.println("token NOT");
 			return sf.newSymbol("NOT",sym.NOT);
+			}
+"func"         {	if(debug) System.out.println("token FUNC");
+			return sf.newSymbol("FUNC",sym.FUNC);
+			}
+"return"       {	if(debug) System.out.println("token RETURN");
+			return sf.newSymbol("RETURN",sym.RETURN);
 			}
 ":="            {	if(debug) System.out.println("token ASSIGN");
 			return sf.newSymbol("ASSIGN",sym.ASSIGN);

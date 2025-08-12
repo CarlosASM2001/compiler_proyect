@@ -1,0 +1,48 @@
+{Este ejemplo demuestra funciones con ambitos global y local}
+int contador_global;
+int valor_global;
+
+func suma(int a, int b)
+    int resultado;
+    resultado := a + b;
+    return resultado;
+end
+
+func factorial(int n)
+    int resultado;
+    if n <= 1 then
+        resultado := 1;
+    else
+        resultado := n * factorial(n - 1);
+    end
+    return resultado;
+end
+
+func incrementar()
+    contador_global := contador_global + 1;
+    return contador_global;
+end
+
+{Programa principal}
+contador_global := 0;
+valor_global := 5;
+
+write suma(3, 4);
+write factorial(valor_global);
+
+incrementar();
+incrementar();
+write contador_global;
+
+{Uso de vectores con funciones}
+int numeros[3];
+int i;
+
+i := 0;
+repeat
+    read numeros[i];
+    i := i + 1;
+until i = 3;
+
+write suma(numeros[0], numeros[1]);
+write suma(suma(numeros[0], numeros[1]), numeros[2]);

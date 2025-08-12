@@ -7,6 +7,7 @@ public class RegistroSimbolo {
 	private int longitud;
 	private int DireccionMemoria;
 	private tipoVar tipoVariable;
+	private String ambito; // "global" or function name
 	
 	public RegistroSimbolo(String identificador, int longitud,
 			int direccionMemoria, tipoVar tipoVariable) {
@@ -15,6 +16,17 @@ public class RegistroSimbolo {
 		this.longitud = longitud;
 		DireccionMemoria = direccionMemoria;
 		this.tipoVariable = tipoVariable;
+		this.ambito = "global"; // default scope
+	}
+
+	public RegistroSimbolo(String identificador, int longitud,
+			int direccionMemoria, tipoVar tipoVariable, String ambito) {
+		super();
+		this.identificador = identificador;
+		this.longitud = longitud;
+		DireccionMemoria = direccionMemoria;
+		this.tipoVariable = tipoVariable;
+		this.ambito = ambito;
 	}
 
 	public String getIdentificador() {
@@ -35,5 +47,13 @@ public class RegistroSimbolo {
 
 	public tipoVar getTipoVariable() {
 		return tipoVariable;
+	}
+
+	public String getAmbito() {
+		return ambito;
+	}
+
+	public void setAmbito(String ambito) {
+		this.ambito = ambito;
 	}
 }

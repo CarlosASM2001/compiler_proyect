@@ -32,7 +32,12 @@ Mas informacion en: http//4thmouse.com/index.php/2007/02/15/using-custom-symbols
 		Util.analisisSemantico(ts,root);
 		if(Util.total_errores == 0){
             Generador.setTablaSimbolos(ts);
-            Generador.generarCodigoObjeto(root);
+            String archivoSalida = "ejemplo_generado/salida.tm";
+            if(args.length > 0) {
+                String archivoFuente = args[0];
+                archivoSalida = archivoFuente.replace(".tny", ".tm").replace("ejemplo_fuente", "ejemplo_generado");
+            }
+            Generador.generarCodigoObjeto(root, archivoSalida);
 		}
 	}
 
@@ -87,6 +92,8 @@ terminal MOD;
 terminal AND;
 terminal OR;
 terminal NOT;
+terminal FUNC;
+terminal RETURN;
 
 /* Simbolos No Terminales */
 non terminal program;
@@ -106,6 +113,14 @@ non terminal NodoBase logic_exp;
 non terminal NodoBase simple_exp;
 non terminal NodoBase term;
 non terminal NodoBase factor;
+non terminal NodoBase func_decl;
+non terminal NodoBase func_seq;
+non terminal NodoBase param_list;
+non terminal NodoBase param_seq;
+non terminal NodoBase return_stmt;
+non terminal NodoBase func_call;
+non terminal NodoBase arg_list;
+non terminal NodoBase arg_seq;
 
 /* Precedencia de operadores */
 precedence left PLUS;
@@ -115,8 +130,8 @@ precedence left TIMES;
 
 /* REGLAS GRAMATICALES */
 program     ::= all_stmts:s	{: if(debug) System.out.println("\t regla 1");
-					            ast = s;
-					           :}
+				            ast = s;
+				           :}
 		;
 
 all_stmts   ::= stmt_seq:s {: if(debug) System.out.println("\t regla 13a");
@@ -206,6 +221,15 @@ stmt        ::= if_stmt:sif	{: if(debug) System.out.println("\t regla 3a");
 					:}
 			| for_stmt:sfor	{: if(debug) System.out.println("\t regla 3g");
             						RESULT=sfor;
+            						:}
+            | func_decl:sfunc	{: if(debug) System.out.println("\t regla 3j");
+            						RESULT=sfunc;
+            						:}
+            | return_stmt:sret SEMI	{: if(debug) System.out.println("\t regla 3h");
+            						RESULT=sret;
+            						:}
+            | func_call:scall SEMI	{: if(debug) System.out.println("\t regla 3i");
+            						RESULT=scall;
             						:}
             | error	{: if(debug) System.out.println("\t regla 3f"); 
 				System.out.println("Ocurrio error en cup # 0004");
@@ -372,8 +396,110 @@ factor      ::= LPAREN exp:ex RPAREN	{: if(debug) System.out.println("\t regla 1
         						System.out.println("Ocurrio error en cup # 0005");
         					}
         					:}
+		| func_call:fcall	{: if(debug) System.out.println("\t regla 12f"); 
+					RESULT=fcall;
+					:}
 		| error	{: if(debug) System.out.println("\t regla 12d"); 
 				System.out.println("Ocurrio error en cup # 0003");
 				RESULT=null;
+				:}
+		;
+
+func_seq    ::= func_seq:ini func_decl:f	{: if(debug) System.out.println("\t regla 18a");
+						NodoBase hijoActual = ini;
+						if(hijoActual !=null){
+							while(hijoActual.TieneHermano()){
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(f);
+							RESULT=ini;
+						}else{
+							RESULT=f;
+						}
+						:}
+            | func_decl:f	{: if(debug) System.out.println("\t regla 18b"); 
+				RESULT=f;				
+				:}
+		;
+
+func_decl   ::= FUNC ID:name LPAREN param_list:params RPAREN all_stmts:body END
+                {: if(debug) System.out.println("\t regla 19a");
+                   RESULT = new NodoFuncion(name, params, body);
+                :}
+            | FUNC ID:name LPAREN RPAREN all_stmts:body END
+                {: if(debug) System.out.println("\t regla 19b");
+                   RESULT = new NodoFuncion(name, null, body);
+                :}
+            ;
+
+param_list  ::= param_seq:p	{: if(debug) System.out.println("\t regla 20a");
+				RESULT=p;
+				:}
+		;
+
+param_seq   ::= param_seq:ini COMMA INT ID:param	{: if(debug) System.out.println("\t regla 21a");
+						NodoBase hijoActual = ini;
+						if(hijoActual !=null){
+							while(hijoActual.TieneHermano()){
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(new NodoDeclaracion(tipoVar.entero, param, 1));
+							RESULT=ini;
+						}else{
+							RESULT=new NodoDeclaracion(tipoVar.entero, param, 1);
+						}
+						:}
+            | param_seq:ini COMMA BOOL ID:param	{: if(debug) System.out.println("\t regla 21b");
+						NodoBase hijoActual = ini;
+						if(hijoActual !=null){
+							while(hijoActual.TieneHermano()){
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(new NodoDeclaracion(tipoVar.booleano, param, 1));
+							RESULT=ini;
+						}else{
+							RESULT=new NodoDeclaracion(tipoVar.booleano, param, 1);
+						}
+						:}
+            | INT ID:param	{: if(debug) System.out.println("\t regla 21c"); 
+				RESULT=new NodoDeclaracion(tipoVar.entero, param, 1);				
+				:}
+            | BOOL ID:param	{: if(debug) System.out.println("\t regla 21d"); 
+				RESULT=new NodoDeclaracion(tipoVar.booleano, param, 1);				
+				:}
+		;
+
+return_stmt ::= RETURN exp:ex	{: if(debug) System.out.println("\t regla 22");
+					RESULT = new NodoReturn(ex);
+					:}
+		;
+
+func_call   ::= ID:name LPAREN arg_list:args RPAREN	{: if(debug) System.out.println("\t regla 23a");
+					RESULT = new NodoLlamadaFuncion(name, args);
+					:}
+            | ID:name LPAREN RPAREN	{: if(debug) System.out.println("\t regla 23b");
+					RESULT = new NodoLlamadaFuncion(name, null);
+					:}
+		;
+
+arg_list    ::= arg_seq:a	{: if(debug) System.out.println("\t regla 24a");
+				RESULT=a;
+				:}
+		;
+
+arg_seq     ::= arg_seq:ini COMMA exp:arg	{: if(debug) System.out.println("\t regla 25a");
+						NodoBase hijoActual = ini;
+						if(hijoActual !=null){
+							while(hijoActual.TieneHermano()){
+								hijoActual = hijoActual.getHermanoDerecha();
+							}
+							hijoActual.setHermanoDerecha(arg);
+							RESULT=ini;
+						}else{
+							RESULT=arg;
+						}
+						:}
+            | exp:arg	{: if(debug) System.out.println("\t regla 25b"); 
+				RESULT=arg;				
 				:}
 		;

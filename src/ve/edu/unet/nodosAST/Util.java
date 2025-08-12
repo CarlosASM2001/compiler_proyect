@@ -31,6 +31,12 @@ public class Util {
 			else if (raiz instanceof NodoEscribir)
 				System.out.println("Escribir");
 
+			else if (raiz instanceof NodoFuncion)
+				System.out.println("Funcion: " + ((NodoFuncion) raiz).getNombre());
+			else if (raiz instanceof NodoReturn)
+				System.out.println("Return");
+			else if (raiz instanceof NodoLlamadaFuncion)
+				System.out.println("Llamada a funcion: " + ((NodoLlamadaFuncion) raiz).getNombre());
 			else if (raiz instanceof NodoOperacion
 					|| raiz instanceof NodoValor
 					|| raiz instanceof NodoIdentificador)
@@ -82,6 +88,21 @@ public class Util {
 				printSpaces();
 				System.out.println("**Prueba REPEAT**");
 				imprimirAST(((NodoRepeat) raiz).getPrueba());
+			} else if (raiz instanceof NodoFuncion) {
+				printSpaces();
+				System.out.println("**Parametros FUNCION**");
+				imprimirAST(((NodoFuncion) raiz).getParametros());
+				printSpaces();
+				System.out.println("**Cuerpo FUNCION**");
+				imprimirAST(((NodoFuncion) raiz).getCuerpo());
+			} else if (raiz instanceof NodoReturn) {
+				printSpaces();
+				System.out.println("**Expresion RETURN**");
+				imprimirAST(((NodoReturn) raiz).getExpresion());
+			} else if (raiz instanceof NodoLlamadaFuncion) {
+				printSpaces();
+				System.out.println("**Argumentos LLAMADA**");
+				imprimirAST(((NodoLlamadaFuncion) raiz).getArgumentos());
 			} else if (raiz instanceof NodoAsignacion)
 				imprimirAST(((NodoAsignacion) raiz).getExpresion());
 			else if (raiz instanceof NodoEscribir)
@@ -145,7 +166,36 @@ public class Util {
 
 	public static void analisisSemantico(TablaSimbolos ts, NodoBase raiz) {
 		while (raiz != null) {
-			if(raiz instanceof NodoAsignacion) {
+			if(raiz instanceof NodoFuncion) {
+				NodoFuncion n = (NodoFuncion) raiz;
+				// Enter function scope for semantic analysis
+				ts.entrarAmbito(n.getNombre());
+				analisisSemantico(ts, n.getCuerpo());
+				ts.salirAmbito();
+			}
+			else if(raiz instanceof NodoReturn) {
+				NodoReturn n = (NodoReturn) raiz;
+				// Check if we're in a function scope
+				if(ts.getAmbitoActual().equals("global")) {
+					total_errores++;
+					System.out.println("*** Error: return statement outside function");
+				}
+				// Check return expression type if needed
+				getTipo(ts, n.getExpresion());
+			}
+			else if(raiz instanceof NodoLlamadaFuncion) {
+				NodoLlamadaFuncion n = (NodoLlamadaFuncion) raiz;
+				// Here we could add function call validation
+				// For now, just check that arguments are valid expressions
+				if(n.getArgumentos() != null) {
+					NodoBase arg = n.getArgumentos();
+					while(arg != null) {
+						getTipo(ts, arg);
+						arg = arg.getHermanoDerecha();
+					}
+				}
+			}
+			else if(raiz instanceof NodoAsignacion) {
 				NodoAsignacion n = (NodoAsignacion) raiz;
 				tipoVar tipoID = getTipo(ts, new NodoIdentificador(n.getIdentificador(), n.getDesplazamiento()));
 				tipoVar tipoEX = getTipo(ts, n.getExpresion());
@@ -278,6 +328,11 @@ public class Util {
 				System.out.println("*** Variable no declarada");
 			}
 			return res;
+		}
+		else if (n instanceof NodoLlamadaFuncion) {
+			// For now, assume function calls return integers
+			// In a full implementation, we'd look up the function return type
+			return tipoVar.entero;
 		}
 		return null;
 	}
