@@ -15,8 +15,32 @@ total=0
 exitosos=0
 con_errores=0
 
-# Compilar desde la raíz del proyecto
-cd /workspace
+# Obtener el directorio del script y cambiar al directorio raíz del proyecto
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+echo "Directorio de trabajo: $(pwd)"
+echo "Verificando dependencias..."
+
+# Verificar que las dependencias existen
+if [ ! -f "src/ve/edu/unet/parser.class" ]; then
+    echo "ERROR: No se encuentra src/ve/edu/unet/parser.class"
+    echo "Por favor, compile el proyecto primero."
+    exit 1
+fi
+
+if [ ! -f "src/especificacion/java-cup-11b-runtime.jar" ]; then
+    echo "ERROR: No se encuentra src/especificacion/java-cup-11b-runtime.jar"
+    exit 1
+fi
+
+if [ ! -f "src/especificacion/java-cup-11b.jar" ]; then
+    echo "ERROR: No se encuentra src/especificacion/java-cup-11b.jar"
+    exit 1
+fi
+
+echo "✓ Todas las dependencias encontradas"
+echo
 
 # Buscar todos los archivos .tny en ejemplo_fuente
 for archivo in ejemplo_fuente/*.tny; do
