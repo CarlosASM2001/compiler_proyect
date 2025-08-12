@@ -1,0 +1,10 @@
+int global;
+
+func suma(int a, int b)
+    int resultado;
+    resultado := a + b;
+    return resultado;
+end
+
+global := 5;
+write suma(2, 3);

@@ -1,5 +1,7 @@
 package ve.edu.unet;
 
+import java.io.*;
+
 /* La idea principal de esta clase (Utilidades de Generacion)es ayudar a emitir las 
  * sentencias en el asembler de la Tiny Machine (TM), haciendo mas sencilla la 
  * implementacion de un generador de codigo objeto para la misma.
@@ -11,6 +13,7 @@ public class UtGen {
 	private static int instruccionActual=0;	//Direccion (num linea) actual de emision de la instruccion
 	private static int instruccionMasAlta=0;	//Almacena la direccion de la instruccion que ha resultado ser la mayor hasta ahora 
 	public static boolean debug=false;
+	private static PrintWriter salida = null;
 
 	/* PC = program counter, registro[7] donde se almacena la direccion (linea)
 	 *  actual de ejecucion del codigo objeto 
@@ -35,8 +38,21 @@ public class UtGen {
 
 	public static int DESP=2;
 	
+	public static void configurarSalida(String nombreArchivo) throws IOException {
+		salida = new PrintWriter(new FileWriter(nombreArchivo));
+	}
+	
+	public static void cerrarSalida() {
+		if (salida != null) {
+			salida.close();
+			salida = null;
+		}
+	}
+	
 	public static void emitirComentario(String c){
-		if(debug) System.out.println("*      "+c);
+		String linea = "*      "+c;
+		if(debug) System.out.println(linea);
+		if(salida != null) salida.println(linea);
 	}
 
 	/* Este procedimiento emite sentencias RO (Solo Registro)
@@ -50,10 +66,11 @@ public class UtGen {
 	 * c = comentario a emitir en modo debug
 	 */
 	public static void emitirRO(String op, int r, int s, int t, String c){
-		System.out.print((instruccionActual++)+":       "+op+"       "+r+","+s+","+t );
+		String linea = (instruccionActual++)+":       "+op+"       "+r+","+s+","+t;
 		if(debug)
-			System.out.print("      "+c);
-		System.out.print("\n");
+			linea += "      "+c;
+		System.out.println(linea);
+		if(salida != null) salida.println(linea);
 		if(instruccionMasAlta < instruccionActual) 
 			instruccionMasAlta = instruccionActual;
 	}
@@ -69,10 +86,11 @@ public class UtGen {
 	 * c = comentario a emitir en modo debug
 	 */	
 	public static void emitirRM(String op, int r, int d, int s, String c){
-		System.out.print((instruccionActual++)+":       "+op+"       "+r+","+d+"("+s+")" );
+		String linea = (instruccionActual++)+":       "+op+"       "+r+","+d+"("+s+")";
 		if(debug)
-			System.out.print("      "+c);
-		System.out.print("\n");
+			linea += "      "+c;
+		System.out.println(linea);
+		if(salida != null) salida.println(linea);
 		if(instruccionMasAlta < instruccionActual) 
 			instruccionMasAlta = instruccionActual;	
 	}
@@ -115,11 +133,12 @@ public class UtGen {
 	 * c = comentario a emitir en modo debug
 	 */
 	public static void emitirRM_Abs(String op, int r, int a, String c){
-		System.out.print((instruccionActual)+":       "+op+"       "+r+","+(a-(instruccionActual+1))+"("+PC+")" );
+		String linea = (instruccionActual)+":       "+op+"       "+r+","+(a-(instruccionActual+1))+"("+PC+")";
 		++instruccionActual;
 		if(debug)
-			System.out.print("      "+c);
-		System.out.print("\n");
+			linea += "      "+c;
+		System.out.println(linea);
+		if(salida != null) salida.println(linea);
 		if(instruccionMasAlta < instruccionActual) 
 			instruccionMasAlta = instruccionActual;	
 	}

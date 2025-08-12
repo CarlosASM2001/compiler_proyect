@@ -34,12 +34,14 @@ public class sym {
   public static final int ID = 10;
   public static final int LE = 16;
   public static final int EOF = 0;
+  public static final int RETURN = 38;
   public static final int RBRACKET = 29;
   public static final int error = 1;
   public static final int MOD = 33;
   public static final int EQ = 13;
   public static final int TIMES = 21;
   public static final int ELSE = 4;
+  public static final int FUNC = 37;
   public static final int READ = 8;
   public static final int THEN = 3;
   public static final int NE = 18;
@@ -82,7 +84,9 @@ public class sym {
   "MOD",
   "AND",
   "OR",
-  "NOT"
+  "NOT",
+  "FUNC",
+  "RETURN"
   };
 }
 

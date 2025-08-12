@@ -1,7 +1,11 @@
+*      Compilacion TINY para el codigo objeto TM
+*      Archivo: NOMBRE_ARREGLAR
+*      Preludio estandar:
 0:       LD       6,0(0)
 1:       ST       0,0(0)
 2:       LDC       0,0(0)
 3:       ST       0,7(5)
+*      repeat: el salto hacia el final (luego del cuerpo) del repeat debe estar aqui
 4:       LDC       2,1(0)
 5:       LD       0,7(5)
 6:       ADD       2,0,2
@@ -63,6 +67,7 @@
 62:       ST       0,0(5)
 63:       LDC       0,1(0)
 64:       ST       0,7(5)
+*      repeat: el salto hacia el final (luego del cuerpo) del repeat debe estar aqui
 65:       LDC       2,1(0)
 66:       LD       0,7(5)
 67:       ADD       2,0,2
@@ -75,11 +80,13 @@
 74:       LDC       0,0(0)
 75:       LDA       7,1(7)
 76:       LDC       0,1(0)
+*      If: el salto hacia el else debe estar aqui
 78:       LDC       2,1(0)
 79:       LD       0,7(5)
 80:       ADD       2,0,2
 81:       LD       0,0(2)
 82:       ST       0,0(5)
+*      If: el salto hacia el final debe estar aqui
 77:       JEQ       0,6(7)
 83:       LDA       7,0(7)
 84:       LD       0,7(5)
@@ -102,4 +109,5 @@
 101:       OUT       0,0,0
 102:       LD       0,0(5)
 103:       OUT       0,0,0
+*      Fin de la ejecucion.
 104:       HALT       0,0,0

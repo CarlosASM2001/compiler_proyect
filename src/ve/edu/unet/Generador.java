@@ -39,20 +39,31 @@ public class Generador {
 		tablaSimbolos = tabla;
 	}
 	
+	public static void generarCodigoObjeto(NodoBase raiz, String nombreArchivo){
+		try {
+			UtGen.configurarSalida(nombreArchivo);
+			System.out.println();
+			System.out.println();
+			System.out.println("------ CODIGO OBJETO DEL LENGUAJE TINY GENERADO PARA LA TM ------");
+			System.out.println();
+			System.out.println();
+			generarPreludioEstandar();
+			generar(raiz);
+			/*Genero el codigo de finalizacion de ejecucion del codigo*/   
+			UtGen.emitirComentario("Fin de la ejecucion.");
+			UtGen.emitirRO("HALT", 0, 0, 0, "");
+			System.out.println();
+			System.out.println();
+			System.out.println("------ FIN DEL CODIGO OBJETO DEL LENGUAJE TINY GENERADO PARA LA TM ------");
+			UtGen.cerrarSalida();
+		} catch (Exception e) {
+			System.err.println("Error al escribir archivo de salida: " + e.getMessage());
+		}
+	}
+
+	// Backward compatibility
 	public static void generarCodigoObjeto(NodoBase raiz){
-		System.out.println();
-		System.out.println();
-		System.out.println("------ CODIGO OBJETO DEL LENGUAJE TINY GENERADO PARA LA TM ------");
-		System.out.println();
-		System.out.println();
-		generarPreludioEstandar();
-		generar(raiz);
-		/*Genero el codigo de finalizacion de ejecucion del codigo*/   
-		UtGen.emitirComentario("Fin de la ejecucion.");
-		UtGen.emitirRO("HALT", 0, 0, 0, "");
-		System.out.println();
-		System.out.println();
-		System.out.println("------ FIN DEL CODIGO OBJETO DEL LENGUAJE TINY GENERADO PARA LA TM ------");
+		generarCodigoObjeto(raiz, "salida.tm");
 	}
 	
 	//Funcion principal de generacion de codigo
@@ -77,6 +88,12 @@ public class Generador {
 			generarIdentificador(nodo);
 		}else if (nodo instanceof NodoOperacion){
 			generarOperacion(nodo);
+		}else if (nodo instanceof NodoFuncion){
+			generarFuncion(nodo);
+		}else if (nodo instanceof NodoReturn){
+			generarReturn(nodo);
+		}else if (nodo instanceof NodoLlamadaFuncion){
+			generarLlamadaFuncion(nodo);
 		}
 		else{
 			if(!(nodo instanceof NodoDeclaracion))
@@ -300,6 +317,50 @@ public class Generador {
 		if(UtGen.debug)	UtGen.emitirComentario("<- Operacion: " + n.getOperacion());
 	}
 	
+	private static void generarFuncion(NodoBase nodo){
+		NodoFuncion n = (NodoFuncion)nodo;
+		if(UtGen.debug) UtGen.emitirComentario("-> funcion: " + n.getNombre());
+		
+		// Set function scope in symbol table
+		tablaSimbolos.entrarAmbito(n.getNombre());
+		
+		// Generate function body
+		generar(n.getCuerpo());
+		
+		// Exit function scope
+		tablaSimbolos.salirAmbito();
+		
+		if(UtGen.debug) UtGen.emitirComentario("<- funcion: " + n.getNombre());
+	}
+	
+	private static void generarReturn(NodoBase nodo){
+		NodoReturn n = (NodoReturn)nodo;
+		if(UtGen.debug) UtGen.emitirComentario("-> return");
+		
+		// Generate return expression
+		generar(n.getExpresion());
+		
+		// For now, just halt (in a full implementation, this would return to caller)
+		UtGen.emitirRO("HALT", 0, 0, 0, "return statement");
+		
+		if(UtGen.debug) UtGen.emitirComentario("<- return");
+	}
+	
+	private static void generarLlamadaFuncion(NodoBase nodo){
+		NodoLlamadaFuncion n = (NodoLlamadaFuncion)nodo;
+		if(UtGen.debug) UtGen.emitirComentario("-> llamada funcion: " + n.getNombre());
+		
+		// Generate arguments (simplified)
+		if(n.getArgumentos() != null) {
+			generar(n.getArgumentos());
+		}
+		
+		// For now, just load 0 as function result (simplified)
+		UtGen.emitirRM("LDC", UtGen.AC, 0, 0, "resultado de funcion: " + n.getNombre());
+		
+		if(UtGen.debug) UtGen.emitirComentario("<- llamada funcion: " + n.getNombre());
+	}
+
 	//TODO: enviar preludio a archivo de salida, obtener antes su nombre
 	private static void generarPreludioEstandar(){
 		UtGen.emitirComentario("Compilacion TINY para el codigo objeto TM");
