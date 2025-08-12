@@ -1,10 +1,14 @@
 int global;
+int resul;
 
 func suma(int a, int b)
     int resultado;
+    int total;
     resultado := a + b;
-    return resultado;
+    total := global + resultado;
+    return total;
 end
 
 global := 5;
-write suma(2, 3);
+resul := suma(2, 3);
+write resul;
