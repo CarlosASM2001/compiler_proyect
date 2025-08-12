@@ -1,5 +1,9 @@
+*      Compilacion TINY para el codigo objeto TM
+*      Archivo: NOMBRE_ARREGLAR
+*      Preludio estandar:
 0:       LD       6,0(0)
 1:       ST       0,0(0)
+*      repeat: el salto hacia el final (luego del cuerpo) del repeat debe estar aqui
 2:       IN       0,0,0
 3:       ST       0,3(5)
 4:       IN       0,0,0
@@ -95,4 +99,5 @@
 94:       LDA       7,1(7)
 95:       LDC       0,1(0)
 96:       JEQ       0,-95(7)
+*      Fin de la ejecucion.
 97:       HALT       0,0,0

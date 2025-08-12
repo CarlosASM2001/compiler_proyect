@@ -1,4 +1,5 @@
-int global := 5;
+int global;
+int resul;
 
 func suma(int a, int b)
     int resultado;
@@ -8,6 +9,6 @@ func suma(int a, int b)
     return total;
 end
 
-int resul; 
+global := 5;
 resul := suma(2, 3);
 write resul;
